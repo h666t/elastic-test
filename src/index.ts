@@ -91,6 +91,7 @@ const addToIndex = (id: string, indexName: string, indexType: IndexType) => {
 (async () => {
     // await createIndex()
     await listAllIndex();
+    // addToIndex('1','1','1')
 })()
 
 server.listen(8000)
