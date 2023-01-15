@@ -1,1 +1,1 @@
-declare type IndexType = "external";
+declare type IndexType = "_doc";

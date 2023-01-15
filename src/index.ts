@@ -72,10 +72,10 @@ const addToIndex = (id: string, indexName: string, indexType: IndexType, postDat
         let options: RequestOptions = {
             hostname: 'localhost',
             port: 9200,
-            path: `/${indexName}/${indexType}/${id}?pretty&pretty'`,
-            method: 'PUT',
+            path: `/${indexName}/${indexType}/${id}`,
+            method: 'POST',
             headers: {
-                "Content-Type": "application/x-www-form-urlencoded"
+                "Content-Type": "application/json"
             }
         }
         let req = http.request(options, (res) => {
@@ -85,7 +85,7 @@ const addToIndex = (id: string, indexName: string, indexType: IndexType, postDat
                 chunk += c
             });
             res.on("end", ()=>{
-                console.log("add index success");
+                console.log("add index finish");
                 console.log(chunk);
                 resolve(chunk);        
             });
@@ -95,15 +95,107 @@ const addToIndex = (id: string, indexName: string, indexType: IndexType, postDat
     })
 }
 
+const getData = (id: string, indexName: string, indexType: IndexType): Promise<string> => {
+    return new Promise((resolve)=>{
+        let options: RequestOptions = {
+            hostname: 'localhost',
+            port: 9200,
+            path: `/${indexName}/${indexType}/${id}`,
+            method: 'get',
+            headers: {
+                "Content-Type": "application/json"
+            }
+        }
+        let req = http.request(options, (res) => {
+            console.log(`get data: id=${id} indexName=${indexName} indexType=${indexType}`);
+            let chunk = "";
+            res.on("data", (c)=>{
+                chunk += c
+            });
+            res.on("end", ()=>{
+                console.log("add index finish");
+                console.log(chunk);
+                resolve(chunk);        
+            });
+        })
+        req.end()
+    })
+}
+
+const addBulkData = (indexName: string, list:object[]): Promise<string> => {
+    return new Promise((resolve)=>{
+        let options: RequestOptions = {
+            hostname: 'localhost',
+            port: 9200,
+            path: `/${indexName}/_bulk`,
+            method: 'PUT',
+            headers: {
+                "Content-Type": "application/json"
+            }
+        }
+        let req = http.request(options, (res) => {
+            console.log(`add bulk data`);
+            let chunk = "";
+            res.on("data", (c)=>{
+                chunk += c
+            });
+            res.on("end", ()=>{
+                console.log("add index finish");
+                console.log(chunk);
+                resolve(chunk);        
+            });
+        })
+        console.log(list.map(item=>JSON.stringify(item)).join(`\n`)+'\n');
+        
+        req.write(list.map(item=>JSON.stringify(item)).join(`\n`)+'\n')
+        req.end()
+    })
+}
+
+const searchDataFromIndex = (indexName: string): Promise<string> => {
+    return new Promise((resolve)=>{
+        let options: RequestOptions = {
+            hostname: 'localhost',
+            port: 9200,
+            path: `/${indexName}/_search`,
+            method: 'GET',
+            headers: {
+                "Content-Type": "application/json"
+            }
+        }
+        let req = http.request(options, (res) => {
+            console.log(`add bulk data`);
+            let chunk = "";
+            res.on("data", (c)=>{
+                chunk += c
+            });
+            res.on("end", ()=>{
+                console.log("add index finish");
+                console.log(chunk);
+                resolve(chunk);        
+            });
+        })
+        req.end()
+    })
+}
+
 
 
 (async () => {
     // await createIndex()
     
-    await addToIndex('1','customer',"external", {
-        "name": "John Doe"
-      })
+    // await addToIndex('1','customer',"_doc", {
+    //     "name": "John Doe"
+    //   })
     // await listAllIndex();
+    // await getData('1', 'customer', '_doc')
+    // await addBulkData("customer",[
+    //     {create:{
+    //         "_id": 66
+    //     }},
+    //     {b:2}
+    // ])
+    await searchDataFromIndex("customer")
 })()
 
-server.listen(8000)
+server.listen(8001)
