@@ -1,5 +1,6 @@
 import * as http from "http";
 import { RequestOptions } from "http";
+// import { IndexType } from "./types";
 
 const server = http.createServer()
 
@@ -47,7 +48,7 @@ const listAllIndex = (): Promise<string> => {
 
 
 // 添加索引
-const addIndex = (indexName: string): Promise<http.IncomingMessage>  => {
+const createIndex = (indexName: string): Promise<http.IncomingMessage>  => {
     return new Promise((resolve)=>{
         let options: RequestOptions = {
             hostname: 'localhost',
@@ -65,9 +66,30 @@ const addIndex = (indexName: string): Promise<http.IncomingMessage>  => {
         }).end()
     })
 }
+// type IndexType = "external"
+const addToIndex = (id: string, indexName: string, indexType: IndexType) => {
+    return new Promise((resolve)=>{
+        let options: RequestOptions = {
+            hostname: 'localhost',
+            port: 9200,
+            path: `/${indexName}/${indexType}/${id}?pretty&pretty'`,
+            method: 'PUT',
+            headers: {
+                "Content-Type": "application/json"
+            }
+        }
+        http.request(options, (res) => {
+            console.log(`添加索引: id=${id} indexName=${indexName} indexType=${indexType}`);
+            resolve(res)
+            return;
+        }).end()
+    })
+}
+
+
 
 (async () => {
-    // await addIndex()
+    // await createIndex()
     await listAllIndex();
 })()
 
