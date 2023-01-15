@@ -67,7 +67,7 @@ const createIndex = (indexName: string): Promise<http.IncomingMessage>  => {
     })
 }
 // type IndexType = "external"
-const addToIndex = (id: string, indexName: string, indexType: IndexType) => {
+const addToIndex = (id: string, indexName: string, indexType: IndexType, postData: object): Promise<string> => {
     return new Promise((resolve)=>{
         let options: RequestOptions = {
             hostname: 'localhost',
@@ -75,14 +75,23 @@ const addToIndex = (id: string, indexName: string, indexType: IndexType) => {
             path: `/${indexName}/${indexType}/${id}?pretty&pretty'`,
             method: 'PUT',
             headers: {
-                "Content-Type": "application/json"
+                "Content-Type": "application/x-www-form-urlencoded"
             }
         }
-        http.request(options, (res) => {
+        let req = http.request(options, (res) => {
             console.log(`添加索引: id=${id} indexName=${indexName} indexType=${indexType}`);
-            resolve(res)
-            return;
-        }).end()
+            let chunk = "";
+            res.on("data", (c)=>{
+                chunk += c
+            });
+            res.on("end", ()=>{
+                console.log("add index success");
+                console.log(chunk);
+                resolve(chunk);        
+            });
+        })
+        req.write(JSON.stringify(postData))
+        req.end()
     })
 }
 
@@ -90,8 +99,11 @@ const addToIndex = (id: string, indexName: string, indexType: IndexType) => {
 
 (async () => {
     // await createIndex()
-    await listAllIndex();
-    // addToIndex('1','1','1')
+    
+    await addToIndex('1','customer',"external", {
+        "name": "John Doe"
+      })
+    // await listAllIndex();
 })()
 
 server.listen(8000)
